@@ -47,7 +47,7 @@ class BookController extends Controller
             'description' => 'required|min:5',
             'image' => 'required|file|image|mimes:jpg,jpeg,png',
             'book_language' => 'required|min:2|max:20',
-            'isbn' => 'required|numeric|unique:books|max:13',
+            'isbn' => 'required|numeric|unique:books|digits_between:1,13',
             'publisher' => 'required|min:3|max:100',
             'type' => 'required|min:3|max:20'
         ]);

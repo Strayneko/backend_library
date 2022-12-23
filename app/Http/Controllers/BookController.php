@@ -24,10 +24,10 @@ class BookController extends Controller
         $books = Book::all()->map(function ($book) use ($categories, $authors) {
             // filter category by id category from book
             // append category object to book object
-            $book['category'] = $categories->filter(fn ($category) => $category->id == $book->category_id);
+            $book['category'] = $categories->filter(fn ($category) => $category->id == $book->category_id)->first();
             // filter author by id author from book
             // append author object to book object
-            $book['author'] = $authors->filter(fn ($author) => $author->id == $book->author_id);
+            $book['author'] = $authors->filter(fn ($author) => $author->id == $book->author_id)->first();
             return $book;
         });
 
@@ -70,17 +70,17 @@ class BookController extends Controller
         // get book data by specified id
         $book = Book::find($id);
         // check book data
-        if (empty($book)) return BaseResponse::error('Uknown Book data with id = ' . $id);
+        if (empty($book)) return BaseResponse::error('Unknown Book data with id = ' . $id);
 
         // find category by given category_id from book data
         $category = Category::find($book->category_id);
         // check if category with the given id is exists
-        if (empty($category))  return BaseResponse::error('Uknown Category with id = ' . $id);
+        if (empty($category))  return BaseResponse::error('Unknown Category with id = ' . $id);
 
         // find author by given author_id from book data
         $author = Author::find($book->author_id);
         // check ifauthor with the given id is exists
-        if (empty($author))  return BaseResponse::error('Uknown Author data with id = ' . $id);
+        if (empty($author))  return BaseResponse::error('Unknown Author data with id = ' . $id);
 
 
         // add category object to book object
@@ -98,7 +98,7 @@ class BookController extends Controller
         // get book data by specified id
         $book = Book::find($id);
         // check book data
-        if (empty($book)) return BaseResponse::error('Uknown Book data with id = ' . $id);
+        if (empty($book)) return BaseResponse::error('Unknown Book data with id = ' . $id);
 
         // validate uer input
         $rules = [
@@ -143,7 +143,7 @@ class BookController extends Controller
         // get book data by specified id
         $book = Book::find($id);
         // check book data
-        if (empty($book)) return BaseResponse::error('Uknown Book data with id = ' . $id);
+        if (empty($book)) return BaseResponse::error('Unknown Book data with id = ' . $id);
 
         // clean image name from host and port
         $image = Str::of($book->image)->remove($request->schemeAndHttpHost() . '/storage/');

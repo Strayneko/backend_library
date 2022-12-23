@@ -11,6 +11,8 @@ use App\Models\Author;
 
 class AuthorController extends Controller
 {
+
+
     // TODO: get all category 
     public function index()
     {
@@ -28,8 +30,8 @@ class AuthorController extends Controller
             'photo' => 'required|file|image|mimes:jpg,jpeg,png',
             'bio' => 'required|min:4',
             'address' => 'required|min:4',
-            'phone_number' => 'required|min:0|max:13',
-            'email' => 'required|email|min:3|max:50'
+            'phone_number' => 'required|min:1|max:13|unique:authors',
+            'email' => 'required|email|min:3|max:50|unique:authors'
 
         ]);
         // if validation fails return feedback message
@@ -62,18 +64,31 @@ class AuthorController extends Controller
         $author = Author::find($id);
         if (empty($author)) return BaseResponse::error('Uknown author with id = ' . $id);
 
-        // validate user input
-        $validated = Validator::make($request->all(), [
-            'name' => 'min:3|max:50',
-            'birth_date' => 'date',
-            'gender' => 'numeric|between:0,1',
-            'photo' => 'file|image|mimes:jpg,jpeg,png',
-            'bio' => 'min:4',
-            'address' => 'min:4',
-            'phone_number' => 'min:0|max:13',
-            'email' => 'email|min:3|max:50'
+        // set validation rules
+        $rules =
+            [
+                'name' => 'min:3|max:50',
+                'birth_date' => 'date',
+                'gender' => 'numeric|between:0,1',
+                'photo' => 'file|image|mimes:jpg,jpeg,png',
+                'bio' => 'min:4',
+                'address' => 'min:4',
+                'phone_number' => 'min:1|max:13',
+                'email' => 'email|min:3|max:50'
 
-        ]);
+            ];
+        // if phone number / email input chaged
+        // add unique validation rule
+        if ($request->input('email') != $author->email) $rules['email'] .= '|unique:authors';
+        if ($request->input('phone_number') != $author->phone_number) $rules['phone_number'] .= '|unique:authors';
+        // validate user input
+        $validated = Validator::make($request->all(), $rules);
+
+        // if validation fails return feedback message
+        if ($validated->fails()) return BaseResponse::error(message: $validated->errors()->all());
+
+        // get validated data
+        $validated = $validated->getData();
 
         // check wheter user upload an image
         if ($request->file('photo')) {
@@ -84,12 +99,6 @@ class AuthorController extends Controller
             // store new logo name with the host and port
             $validated['photo'] = $request->getSchemeAndHttpHost() . '/storage/' . $validated['photo']->store('images/photo', 'public');
         }
-
-        // if validation fails return feedback message
-        if ($validated->fails()) return BaseResponse::error(message: $validated->errors()->all());
-
-        // get validated data
-        $validated = $validated->getData();
         // update specified author
         $author->update($validated);
         // return response message

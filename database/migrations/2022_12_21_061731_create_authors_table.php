@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('photo');
             $table->text('bio');
             $table->text('address');
-            $table->string('phone_number', 13);
+            $table->string('phone_number', 13)->unique();
             $table->string('email', 50)->unique();
             $table->timestamps();
         });

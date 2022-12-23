@@ -23,7 +23,7 @@ class CategoryController extends Controller
     {
         // validate user input
         $validated = Validator::make($request->all(), [
-            'name' => 'required|min:3|max:50|unique:categories|lowercase',
+            'name' => 'required|min:3|max:50|unique:categories',
             'logo' => 'required|file|image|mimes:jpg,jpeg,png',
             'description' => 'required|min:3',
             'age_rating' => 'required|numeric|min:1',
@@ -61,14 +61,19 @@ class CategoryController extends Controller
         $category = Category::find($id);
         if (empty($category)) return BaseResponse::error('Uknown category with id = ' . $id);
 
-        // validate user input
-        $validated = Validator::make($request->all(), [
-            'name' => 'min:3|max:50|unique:categories',
+        // set validation rules
+        $rules = [
+            'name' => 'min:3|max:50',
             'logo' => 'file|image|mimes:jpg,jpeg,png',
             'description' => 'min:3',
             'age_rating' => 'numeric|min:1',
 
-        ]);
+        ];
+        // validate user input
+        $validated = Validator::make($request->all(), $rules);
+        // if category name changed
+        // add unique validation rules to category name field
+        if ($category->name != $request->input('name')) $rules['name'] .= '|unique:categories';
         // if validation fails return feedback message
         if ($validated->fails()) return BaseResponse::error(message: $validated->errors()->all());
 
